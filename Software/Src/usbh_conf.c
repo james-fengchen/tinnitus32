@@ -1,57 +1,58 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file            : usbh_conf.c
-  * @version         : v1.0_Cube
-  * @brief           : This file implements the board support package for the USB host library
+  * @file           : usbh_conf.c
+  * @version        : v1.0_Cube
+  * @brief          : This file implements the board support package for the USB host library
   ******************************************************************************
-  * This notice applies to any and all portions of this file
-  * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether
-  * inserted by the user or by software development tools
-  * are owned by their respective copyright owners.
+  * @attention
   *
-  * Copyright (c) 2021 STMicroelectronics International N.V.
-  * All rights reserved.
+  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * All rights reserved.</center></h2>
   *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                             www.st.com/SLA0044
   *
   ******************************************************************************
-*/
+  */
+/* USER CODE END Header */
+
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
 #include "usbh_platform.h"
 
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE END PV */
+
 HCD_HandleTypeDef hhcd_USB_OTG_FS;
-void _Error_Handler(char * file, int line);
+void Error_Handler(void);
+
+/* USER CODE BEGIN 0 */
+/* USER CODE END 0 */
+
+/* USER CODE BEGIN PFP */
+/* Private function prototypes -----------------------------------------------*/
+USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status);
+
+/* USER CODE END PFP */
+
+/* Private functions ---------------------------------------------------------*/
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
 
 /*******************************************************************************
                        LL Driver Callbacks (HCD -> USB Host Library)
@@ -60,13 +61,14 @@ void _Error_Handler(char * file, int line);
 
 void HAL_HCD_MspInit(HCD_HandleTypeDef* hcdHandle)
 {
-  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(hcdHandle->Instance==USB_OTG_FS)
   {
   /* USER CODE BEGIN USB_OTG_FS_MspInit 0 */
 
   /* USER CODE END USB_OTG_FS_MspInit 0 */
 
+    __HAL_RCC_GPIOA_CLK_ENABLE();
     /**USB_OTG_FS GPIO Configuration
     PA9     ------> USB_OTG_FS_VBUS
     PA10     ------> USB_OTG_FS_ID
@@ -131,7 +133,7 @@ void HAL_HCD_MspDeInit(HCD_HandleTypeDef* hcdHandle)
   */
 void HAL_HCD_SOF_Callback(HCD_HandleTypeDef *hhcd)
 {
-  USBH_LL_IncTimer (hhcd->pData);
+  USBH_LL_IncTimer(hhcd->pData);
 }
 
 /**
@@ -157,6 +159,8 @@ void HAL_HCD_Disconnect_Callback(HCD_HandleTypeDef *hhcd)
 /**
   * @brief  Notify URB state change callback.
   * @param  hhcd: HCD handle
+  * @param  chnum: channel number
+  * @param  urb_state: state
   * @retval None
   */
 void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum, HCD_URBStateTypeDef urb_state)
@@ -166,20 +170,40 @@ void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum,
   USBH_LL_NotifyURBChange(hhcd->pData);
 #endif
 }
+/**
+* @brief  Port Port Enabled callback.
+  * @param  hhcd: HCD handle
+  * @retval None
+  */
+void HAL_HCD_PortEnabled_Callback(HCD_HandleTypeDef *hhcd)
+{
+  USBH_LL_PortEnabled(hhcd->pData);
+}
+
+/**
+  * @brief  Port Port Disabled callback.
+  * @param  hhcd: HCD handle
+  * @retval None
+  */
+void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd)
+{
+  USBH_LL_PortDisabled(hhcd->pData);
+}
+
 /*******************************************************************************
                        LL Driver Interface (USB Host Library --> HCD)
 *******************************************************************************/
+
 /**
-  * @brief  USBH_LL_Init
-  *         Initialize the Low Level portion of the Host driver.
+  * @brief  Initialize the low level portion of the host driver.
   * @param  phost: Host handle
-  * @retval USBH Status
+  * @retval USBH status
   */
-USBH_StatusTypeDef  USBH_LL_Init (USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost)
 {
   /* Init USB_IP */
   if (phost->id == HOST_FS) {
-  /* Link The driver to the stack */
+  /* Link the driver to the stack. */
   hhcd_USB_OTG_FS.pData = phost;
   phost->pData = &hhcd_USB_OTG_FS;
 
@@ -191,120 +215,71 @@ USBH_StatusTypeDef  USBH_LL_Init (USBH_HandleTypeDef *phost)
   hhcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
   if (HAL_HCD_Init(&hhcd_USB_OTG_FS) != HAL_OK)
   {
-    _Error_Handler(__FILE__, __LINE__);
+    Error_Handler( );
   }
 
-  USBH_LL_SetTimer (phost, HAL_HCD_GetCurrentFrame(&hhcd_USB_OTG_FS));
+  USBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame(&hhcd_USB_OTG_FS));
   }
   return USBH_OK;
 }
 
 /**
-  * @brief  USBH_LL_DeInit
-  *         De-Initialize the Low Level portion of the Host driver.
+  * @brief  De-Initialize the low level portion of the host driver.
   * @param  phost: Host handle
-  * @retval USBH Status
+  * @retval USBH status
   */
-USBH_StatusTypeDef  USBH_LL_DeInit (USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_LL_DeInit(USBH_HandleTypeDef *phost)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
   hal_status = HAL_HCD_DeInit(phost->pData);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+
   return usb_status;
 }
 
 /**
-  * @brief  USBH_LL_Start
-  *         Start the Low Level portion of the Host driver.
+  * @brief  Start the low level portion of the host driver.
   * @param  phost: Host handle
-  * @retval USBH Status
+  * @retval USBH status
   */
-USBH_StatusTypeDef  USBH_LL_Start(USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_LL_Start(USBH_HandleTypeDef *phost)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
   hal_status = HAL_HCD_Start(phost->pData);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+
   return usb_status;
 }
 
 /**
-  * @brief  USBH_LL_Stop
-  *         Stop the Low Level portion of the Host driver.
+  * @brief  Stop the low level portion of the host driver.
   * @param  phost: Host handle
-  * @retval USBH Status
+  * @retval USBH status
   */
-USBH_StatusTypeDef  USBH_LL_Stop (USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_LL_Stop(USBH_HandleTypeDef *phost)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
   hal_status = HAL_HCD_Stop(phost->pData);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+
   return usb_status;
 }
 
 /**
-  * @brief  USBH_LL_GetSpeed
-  *         Return the USB Host Speed from the Low Level Driver.
+  * @brief  Return the USB host speed from the low level driver.
   * @param  phost: Host handle
-  * @retval USBH Speeds
+  * @retval USBH speeds
   */
-USBH_SpeedTypeDef USBH_LL_GetSpeed  (USBH_HandleTypeDef *phost)
+USBH_SpeedTypeDef USBH_LL_GetSpeed(USBH_HandleTypeDef *phost)
 {
   USBH_SpeedTypeDef speed = USBH_SPEED_FULL;
 
@@ -330,135 +305,78 @@ USBH_SpeedTypeDef USBH_LL_GetSpeed  (USBH_HandleTypeDef *phost)
 }
 
 /**
-  * @brief  USBH_LL_ResetPort
-  *         Reset the Host Port of the Low Level Driver.
+  * @brief  Reset the Host port of the low level driver.
   * @param  phost: Host handle
-  * @retval USBH Status
+  * @retval USBH status
   */
-USBH_StatusTypeDef USBH_LL_ResetPort (USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_LL_ResetPort(USBH_HandleTypeDef *phost)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
   hal_status = HAL_HCD_ResetPort(phost->pData);
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+
+  usb_status = USBH_Get_USB_Status(hal_status);
+
   return usb_status;
 }
 
 /**
-  * @brief  USBH_LL_GetLastXferSize
-  *         Return the last transfered packet size.
+  * @brief  Return the last transferred packet size.
   * @param  phost: Host handle
   * @param  pipe: Pipe index
-  * @retval Packet Size
+  * @retval Packet size
   */
-uint32_t USBH_LL_GetLastXferSize  (USBH_HandleTypeDef *phost, uint8_t pipe)
+uint32_t USBH_LL_GetLastXferSize(USBH_HandleTypeDef *phost, uint8_t pipe)
 {
   return HAL_HCD_HC_GetXferCount(phost->pData, pipe);
 }
 
 /**
-  * @brief  USBH_LL_OpenPipe
-  *         Open a pipe of the Low Level Driver.
+  * @brief  Open a pipe of the low level driver.
   * @param  phost: Host handle
   * @param  pipe_num: Pipe index
-  * @param  epnum: Endpoint Number
+  * @param  epnum: Endpoint number
   * @param  dev_address: Device USB address
   * @param  speed: Device Speed
-  * @param  ep_type: Endpoint Type
-  * @param  mps: Endpoint Max Packet Size
-  * @retval USBH Status
+  * @param  ep_type: Endpoint type
+  * @param  mps: Endpoint max packet size
+  * @retval USBH status
   */
-USBH_StatusTypeDef   USBH_LL_OpenPipe    (USBH_HandleTypeDef *phost,
-                                      uint8_t pipe_num,
-                                      uint8_t epnum,
-                                      uint8_t dev_address,
-                                      uint8_t speed,
-                                      uint8_t ep_type,
-                                      uint16_t mps)
+USBH_StatusTypeDef USBH_LL_OpenPipe(USBH_HandleTypeDef *phost, uint8_t pipe_num, uint8_t epnum,
+                                    uint8_t dev_address, uint8_t speed, uint8_t ep_type, uint16_t mps)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
-  hal_status = HAL_HCD_HC_Init(phost->pData,
-                               pipe_num,
-                               epnum,
-                               dev_address,
-                               speed,
-                               ep_type,
-                              mps);
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  hal_status = HAL_HCD_HC_Init(phost->pData, pipe_num, epnum,
+                               dev_address, speed, ep_type, mps);
+
+  usb_status = USBH_Get_USB_Status(hal_status);
+
   return usb_status;
 }
 
 /**
-  * @brief  USBH_LL_ClosePipe
-  *         Close a pipe of the Low Level Driver.
+  * @brief  Close a pipe of the low level driver.
   * @param  phost: Host handle
-  * @param  pipe_num: Pipe index
-  * @retval USBH Status
+  * @param  pipe: Pipe index
+  * @retval USBH status
   */
-USBH_StatusTypeDef   USBH_LL_ClosePipe   (USBH_HandleTypeDef *phost, uint8_t pipe)
+USBH_StatusTypeDef USBH_LL_ClosePipe(USBH_HandleTypeDef *phost, uint8_t pipe)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
   hal_status = HAL_HCD_HC_Halt(phost->pData, pipe);
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+
+  usb_status = USBH_Get_USB_Status(hal_status);
+
   return usb_status;
 }
 
 /**
-  * @brief  USBH_LL_SubmitURB
-  *         Submit a new URB to the low level driver.
+  * @brief  Submit a new URB to the low level driver.
   * @param  phost: Host handle
   * @param  pipe: Pipe index
   *         This parameter can be a value from 1 to 15
@@ -484,28 +402,130 @@ USBH_StatusTypeDef   USBH_LL_ClosePipe   (USBH_HandleTypeDef *phost, uint8_t pip
   *           1 : do ping active
   * @retval Status
   */
-
-USBH_StatusTypeDef   USBH_LL_SubmitURB  (USBH_HandleTypeDef *phost,
-                                            uint8_t pipe,
-                                            uint8_t direction ,
-                                            uint8_t ep_type,
-                                            uint8_t token,
-                                            uint8_t* pbuff,
-                                            uint16_t length,
-                                            uint8_t do_ping )
+USBH_StatusTypeDef USBH_LL_SubmitURB(USBH_HandleTypeDef *phost, uint8_t pipe, uint8_t direction,
+                                     uint8_t ep_type, uint8_t token, uint8_t *pbuff, uint16_t length,
+                                     uint8_t do_ping)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBH_StatusTypeDef usb_status = USBH_OK;
 
-  hal_status = HAL_HCD_HC_SubmitRequest (phost->pData,
-                                         pipe,
-                                         direction ,
-                                         ep_type,
-                                         token,
-                                         pbuff,
-                                         length,
-                                         do_ping);
-  switch (hal_status) {
+  hal_status = HAL_HCD_HC_SubmitRequest(phost->pData, pipe, direction ,
+                                        ep_type, token, pbuff, length,
+                                        do_ping);
+  usb_status =  USBH_Get_USB_Status(hal_status);
+
+  return usb_status;
+}
+
+/**
+  * @brief  Get a URB state from the low level driver.
+  * @param  phost: Host handle
+  * @param  pipe: Pipe index
+  *         This parameter can be a value from 1 to 15
+  * @retval URB state
+  *          This parameter can be one of the these values:
+  *            @arg URB_IDLE
+  *            @arg URB_DONE
+  *            @arg URB_NOTREADY
+  *            @arg URB_NYET
+  *            @arg URB_ERROR
+  *            @arg URB_STALL
+  */
+USBH_URBStateTypeDef USBH_LL_GetURBState(USBH_HandleTypeDef *phost, uint8_t pipe)
+{
+  return (USBH_URBStateTypeDef)HAL_HCD_HC_GetURBState (phost->pData, pipe);
+}
+
+/**
+  * @brief  Drive VBUS.
+  * @param  phost: Host handle
+  * @param  state : VBUS state
+  *          This parameter can be one of the these values:
+  *           0 : VBUS Inactive
+  *           1 : VBUS Active
+  * @retval Status
+  */
+USBH_StatusTypeDef USBH_LL_DriverVBUS(USBH_HandleTypeDef *phost, uint8_t state)
+{
+  if (phost->id == HOST_FS) {
+    MX_DriverVbusFS(state);
+  }
+
+  /* USER CODE BEGIN 0 */
+  /* USER CODE END 0*/
+
+  HAL_Delay(200);
+  return USBH_OK;
+}
+
+/**
+  * @brief  Set toggle for a pipe.
+  * @param  phost: Host handle
+  * @param  pipe: Pipe index
+  * @param  toggle: toggle (0/1)
+  * @retval Status
+  */
+USBH_StatusTypeDef USBH_LL_SetToggle(USBH_HandleTypeDef *phost, uint8_t pipe, uint8_t toggle)
+{
+  HCD_HandleTypeDef *pHandle;
+  pHandle = phost->pData;
+
+  if(pHandle->hc[pipe].ep_is_in)
+  {
+    pHandle->hc[pipe].toggle_in = toggle;
+  }
+  else
+  {
+    pHandle->hc[pipe].toggle_out = toggle;
+  }
+
+  return USBH_OK;
+}
+
+/**
+  * @brief  Return the current toggle of a pipe.
+  * @param  phost: Host handle
+  * @param  pipe: Pipe index
+  * @retval toggle (0/1)
+  */
+uint8_t USBH_LL_GetToggle(USBH_HandleTypeDef *phost, uint8_t pipe)
+{
+  uint8_t toggle = 0;
+  HCD_HandleTypeDef *pHandle;
+  pHandle = phost->pData;
+
+  if(pHandle->hc[pipe].ep_is_in)
+  {
+    toggle = pHandle->hc[pipe].toggle_in;
+  }
+  else
+  {
+    toggle = pHandle->hc[pipe].toggle_out;
+  }
+  return toggle;
+}
+
+/**
+  * @brief  Delay routine for the USB Host Library
+  * @param  Delay: Delay in ms
+  * @retval None
+  */
+void USBH_Delay(uint32_t Delay)
+{
+  HAL_Delay(Delay);
+}
+
+/**
+  * @brief  Returns the USB status depending on the HAL status:
+  * @param  hal_status: HAL status
+  * @retval USB status
+  */
+USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status)
+{
+  USBH_StatusTypeDef usb_status = USBH_OK;
+
+  switch (hal_status)
+  {
     case HAL_OK :
       usb_status = USBH_OK;
     break;
@@ -525,106 +545,4 @@ USBH_StatusTypeDef   USBH_LL_SubmitURB  (USBH_HandleTypeDef *phost,
   return usb_status;
 }
 
-/**
-  * @brief  USBH_LL_GetURBState
-  *         Get a URB state from the low level driver.
-  * @param  phost: Host handle
-  * @param  pipe: Pipe index
-  *         This parameter can be a value from 1 to 15
-  * @retval URB state
-  *          This parameter can be one of the these values:
-  *            @arg URB_IDLE
-  *            @arg URB_DONE
-  *            @arg URB_NOTREADY
-  *            @arg URB_NYET
-  *            @arg URB_ERROR
-  *            @arg URB_STALL
-  */
-USBH_URBStateTypeDef  USBH_LL_GetURBState (USBH_HandleTypeDef *phost, uint8_t pipe)
-{
-  return (USBH_URBStateTypeDef)HAL_HCD_HC_GetURBState (phost->pData, pipe);
-}
-
-/**
-  * @brief  USBH_LL_DriverVBUS
-  *         Drive VBUS.
-  * @param  phost: Host handle
-  * @param  state : VBUS state
-  *          This parameter can be one of the these values:
-  *           0 : VBUS Active
-  *           1 : VBUS Inactive
-  * @retval Status
-  */
-USBH_StatusTypeDef  USBH_LL_DriverVBUS (USBH_HandleTypeDef *phost, uint8_t state)
-{
-  if (phost->id == HOST_FS) {
-    MX_DriverVbusFS(state);
-  }
-
-  /* USER CODE BEGIN 0 */
-  /* USER CODE END 0*/
-  HAL_Delay(200);
-  return USBH_OK;
-}
-
-/**
-  * @brief  USBH_LL_SetToggle
-  *         Set toggle for a pipe.
-  * @param  phost: Host handle
-  * @param  pipe: Pipe index
-  * @param  pipe_num: Pipe index
-  * @param  toggle: toggle (0/1)
-  * @retval Status
-  */
-USBH_StatusTypeDef   USBH_LL_SetToggle   (USBH_HandleTypeDef *phost, uint8_t pipe, uint8_t toggle)
-{
-  HCD_HandleTypeDef *pHandle;
-  pHandle = phost->pData;
-
-  if(pHandle->hc[pipe].ep_is_in)
-  {
-    pHandle->hc[pipe].toggle_in = toggle;
-  }
-  else
-  {
-    pHandle->hc[pipe].toggle_out = toggle;
-  }
-
-  return USBH_OK;
-}
-
-/**
-  * @brief  USBH_LL_GetToggle
-  *         Return the current toggle of a pipe.
-  * @param  phost: Host handle
-  * @param  pipe: Pipe index
-  * @retval toggle (0/1)
-  */
-uint8_t  USBH_LL_GetToggle   (USBH_HandleTypeDef *phost, uint8_t pipe)
-{
-  uint8_t toggle = 0;
-  HCD_HandleTypeDef *pHandle;
-  pHandle = phost->pData;
-
-  if(pHandle->hc[pipe].ep_is_in)
-  {
-    toggle = pHandle->hc[pipe].toggle_in;
-  }
-  else
-  {
-    toggle = pHandle->hc[pipe].toggle_out;
-  }
-  return toggle;
-}
-
-/**
-  * @brief  USBH_Delay
-  *         Delay routine for the USB Host Library
-  * @param  Delay: Delay in ms
-  * @retval None
-  */
-void  USBH_Delay (uint32_t Delay)
-{
-  HAL_Delay(Delay);
-}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
