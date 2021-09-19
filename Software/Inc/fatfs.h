@@ -53,6 +53,7 @@
  extern "C" {
 #endif
 
+#include "ff_gen_drv.h"
 #include "usbh_diskio.h" /* defines USBH_Driver as external */
 
 /* USER CODE BEGIN Includes */

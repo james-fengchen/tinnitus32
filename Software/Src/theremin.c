@@ -30,6 +30,8 @@
 #include "usb_stick.h"
 #include <math.h>
 
+extern TIM_HandleTypeDef htim4;
+
 uint16_t usCC[8];
 int16_t ssWaveTable[4096];
 
@@ -781,7 +783,7 @@ void THEREMIN_1msTask(void)
 	}
 
 
-
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,(int)(fPitch*10));
 
 }
 
