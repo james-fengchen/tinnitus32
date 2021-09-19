@@ -160,9 +160,13 @@ int main(void)
 
   BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
 
-  // init PWM output
+  // init PWM output for servo motor
   HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
-  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,1);
+  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,0);
+
+  // init PWM output for external LED
+  HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
+  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_3,65535);
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -782,8 +782,13 @@ void THEREMIN_1msTask(void)
 		THEREMIN_AutotuneDisplay();
 	}
 
+	// update external PWM outputs
+	int32_t pwmValue = (int32_t)(fPitch*10);
+	if (pwmValue > 65535) pwmValue = 65535;
+	if (pwmValue < 0) pwmValue = 0;
 
-	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,(int)(fPitch*10));
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,(uint16_t)pwmValue);
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_3,65535 - (uint16_t)pwmValue);
 
 }
 
