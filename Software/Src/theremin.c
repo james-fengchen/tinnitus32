@@ -108,6 +108,15 @@ uint32_t ulStopwatch = 0;
 #define STOPWATCH_STOP() ;
 #endif
 
+int32_t map(float src, int32_t src_low, int32_t src_high, int32_t dst_low, int32_t dst_high) {
+	int32_t ret = (src - (float)src_low) / (float)(src_high - src_low) * (float)(dst_high - dst_low) + dst_low;
+
+	if (ret < dst_low) ret = dst_low;
+	if (ret > dst_high) ret = dst_high;
+
+	return ret;
+}
+
 /**
  * @brief Initialize the module
  *
@@ -783,9 +792,7 @@ void THEREMIN_1msTask(void)
 	}
 
 	// update external PWM outputs
-	int32_t pwmValue = (int32_t)(fPitch*10);
-	if (pwmValue > 65535) pwmValue = 65535;
-	if (pwmValue < 0) pwmValue = 0;
+	int32_t pwmValue = map(fPitch, 200, 1500, 0, 65535);
 
 	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,(uint16_t)pwmValue);
 	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_3,65535 - (uint16_t)pwmValue);
