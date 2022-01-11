@@ -792,10 +792,20 @@ void THEREMIN_1msTask(void)
 	}
 
 	// update external PWM outputs
-	int32_t pwmValue = map(fPitch, 200, 1500, 0, 65535);
+	static int32_t lastMappedVol = 0;
+	static int32_t lastMappedPitch = 0;
 
-	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,(uint16_t)pwmValue);
-	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_3,65535 - (uint16_t)pwmValue);
+	int32_t currentMappedVol = map(slVol, 20, 800, 20000, 65535);
+	int32_t currentMappedPitch = map(fPitch, 0, 40000000, 2000, 65535);
+
+	int32_t mappedVol = (lastMappedVol + currentMappedVol) / 2;
+	int32_t mappedPitch = (lastMappedPitch + currentMappedPitch) / 2;
+
+	lastMappedVol = mappedVol;
+	lastMappedPitch = mappedPitch;
+
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,(uint16_t)mappedVol);
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_3,65535 - (uint16_t)mappedPitch);
 
 }
 
